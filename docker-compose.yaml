@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  supa-coda-nest_mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - ${DB_PORT}:3306
+    volumes:
+      - supa-coda-nest_db_vol:/var/lib/mysql
+    networks:
+      - supa-coda-nest_net
+
+networks:
+  supa-coda-nest_net:
+    name: supa-coda-nest_net
+    driver: bridge
+
+volumes:
+  supa-coda-nest_db_vol:

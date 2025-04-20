@@ -1,0 +1,40 @@
+@startuml
+
+participant "BA Agent\n(Requirement Refiner Agent)" as BAAgent
+participant "Dev Agent\n(Code Generator Agent)" as DevAgent
+database "Shared Storage" as Storage
+
+BAAgent -> BAAgent : Generate Dev Requirement
+BAAgent -> Storage : Save Dev Requirement + Session Info
+
+BAAgent -> DevAgent : POST /generate-code\nBody: DevRequirement JSON
+DevAgent -> BAAgent : ACK (status: received,\ndev_agent_session_id)
+
+note right of BAAgent
+  Communication Protocol:
+  - Method: HTTP POST or async
+  - Endpoint: /generate-code
+  - Payload:
+    {
+      "ba_agent_session_id": "...",
+      "dev_requirement": { ... }
+    }
+  - Response:
+    {
+      "status": "received",
+      "dev_agent_session_id": "..."
+    }
+end note
+
+note right of Storage
+  BA Agent stores:
+  - ba_agent_session_id
+  - structured_user_requirement
+  - dev_requirement
+  - clarification_log (if any)
+  - dependencies validated
+  - status & timestamp
+  - version history
+end note
+
+@enduml

@@ -1,0 +1,39 @@
+@startuml
+
+actor User
+participant "Supa Coda\n(Prompt Parser Agent)" as SupaCoda
+participant "BA Agent\n(Requirement Refiner Agent)" as BAAgent
+database "Shared Storage" as Storage
+
+User -> SupaCoda : Submit Prompt
+SupaCoda -> SupaCoda : Parse Prompt
+SupaCoda -> Storage : Save Session Info\n(raw_prompt, structured_req, user_id, etc.)
+SupaCoda -> BAAgent : POST /analyze-requirement\nBody: StructuredUserRequirement JSON
+BAAgent -> SupaCoda : ACK (status: received, ba_agent_session_id)
+
+note right of SupaCoda
+  Communication Protocol:
+  - Method: HTTP POST or async message
+  - Endpoint: /analyze-requirement
+  - Payload:
+    {
+      "session_id": "...",
+      "structured_user_requirement": { ... }
+    }
+  - Response:
+    {
+      "status": "received",
+      "ba_agent_session_id": "..."
+    }
+end note
+
+note right of Storage
+  Supa Coda stores:
+  - session_id, user_id
+  - raw_prompt
+  - structured_user_requirement
+  - status, timestamp
+  - version (for audit)
+end note
+
+@enduml

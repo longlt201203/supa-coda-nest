@@ -1,0 +1,48 @@
+@startuml
+
+actor User
+
+rectangle "Supa Coda\n(Prompt Parser)" as SupaCoda
+rectangle "BA Agent\n(Requirement Refiner)" as BAAgent
+rectangle "Dev Agent\n(Code Generator)" as DevAgent
+database "Shared Storage" as Storage
+
+User --> SupaCoda : Prompt
+SupaCoda --> BAAgent : Structured User Requirement
+BAAgent --> DevAgent : Dev Requirement
+
+SupaCoda --> Storage : Read/Write
+BAAgent --> Storage : Read/Write
+DevAgent --> Storage : Read/Write
+
+DevAgent --> SupaCoda : Code Output / Response
+SupaCoda --> User : Final Output
+
+note right of BAAgent
+  Structured User Requirement:
+  - Task goal (what to build)
+  - Input/output description
+  - Language preference
+  - Constraints (if any)
+  - Clarification status
+end note
+
+note right of DevAgent
+  Dev Requirement:
+  - Feature name and summary
+  - Language and dependencies
+  - Input/output specifications
+  - Constraints and error handling
+  - Example test cases
+end note
+
+note right of Storage
+  Shared Storage:
+  - Raw prompt & interaction logs
+  - Structured & dev requirements
+  - Final code output
+  - Past tasks, reusable code
+  - Dependency & tool suggestions
+end note
+
+@enduml
