@@ -125,6 +125,7 @@ function appendMessage(message, type) {
     displayerElement.scrollTop = displayerElement.scrollHeight;
 }
 
+let sessionId;
 async function handleSend() {
     const userPrompt = promptInputElement.value.trim();
     if (!userPrompt) return;
@@ -141,7 +142,8 @@ async function handleSend() {
         const response = await fetch("/api/agents/message", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "x-session-id": sessionId
             },
             body: JSON.stringify({
                 message: userPrompt
@@ -194,11 +196,23 @@ async function handleSend() {
     }
 }
 
-function clearConversation() {
+async function clearConversation() {
+    // Add confirmation dialog
+    if (!confirm("Are you sure you want to clear the conversation?")) {
+        return; // User cancelled the operation
+    }
+    
     // Clear all messages except the welcome message
     while (displayerElement.childNodes.length > 1) {
         displayerElement.removeChild(displayerElement.lastChild);
     }
+    // Delete the session
+    await fetch(`/api/session/${sessionId}`, {
+        method: "DELETE",
+    });
+
+    // Init session again
+    await initSession()
 }
 
 // Toggle debug mode
@@ -242,3 +256,32 @@ promptInputElement.addEventListener("keydown", (e) => {
 
 // Initialize the UI
 initUI();
+
+async function initSession() {
+    let response = await fetch("/api/session", {
+        method: "GET",
+    });
+    let responseData = await response.json();
+    if (responseData.data.length == 0) {
+        response = await fetch("/api/session", {
+            method: "POST",
+        });
+        responseData = await response.json();
+        sessionId = responseData.data.id;
+    } else {
+        sessionId = responseData.data[0].id;
+    }
+
+    console.log("Session ID:", sessionId)
+
+    // Get the session
+    response = await fetch(`/api/session/${sessionId}`, {
+        method: "GET"
+    });
+    responseData = await response.json();
+    responseData.data.conversation.forEach((item) => {
+        appendMessage(item.data, item.type)
+    })
+}
+
+initSession();

@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
-import { genAI } from "@utils";
+import { genAI, SupaCodaClsStore } from "@utils";
 import * as fs from "fs";
 import {
 	ParseUserPromptResponse,
@@ -8,11 +8,13 @@ import {
 import { MessageRequest } from "../dto";
 import { PromptParserAgentMemoryRepository } from "@db/repositories";
 import { ContentListUnion } from "@google/genai";
+import { ClsService } from "nestjs-cls";
 
 @Injectable()
 export class PromptParserAgentService implements OnModuleInit {
 	constructor(
 		private readonly promptParserAgentMemoryRepository: PromptParserAgentMemoryRepository,
+		private readonly cls: ClsService<SupaCodaClsStore>,
 	) {}
 
 	private instructionFilePath = "instructions/prompt-parser-agent.txt";
@@ -32,14 +34,21 @@ export class PromptParserAgentService implements OnModuleInit {
 		request: MessageRequest,
 		response: ParseUserPromptResponse,
 	) {
+		const sessionId = this.cls.get("session.id");
 		await this.promptParserAgentMemoryRepository.save({
 			input: request.message,
 			output: JSON.stringify(response),
+			sessionId: sessionId,
 		});
 	}
 
 	private async getMemories() {
-		const entities = await this.promptParserAgentMemoryRepository.find();
+		const sessionId = this.cls.get("session.id");
+		const entities = await this.promptParserAgentMemoryRepository.find({
+			where: {
+				sessionId: sessionId,
+			},
+		});
 		return entities.map((item) => {
 			return {
 				input: item.input,

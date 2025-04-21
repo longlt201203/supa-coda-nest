@@ -44,9 +44,11 @@ export class GreetingAgentService implements OnModuleInit {
 		request: MessageRequest,
 		response: DoGreetingResponse,
 	) {
+		const sessionId = this.cls.get("session.id");
 		await this.greetingAgentMemoryRepository.save({
 			input: request.message,
 			output: response.message,
+			sessionId: sessionId,
 		});
 	}
 

@@ -13,6 +13,7 @@ import {
 	CreateSessionRequest,
 	UpdateSessionRequest,
 	SessionQuery,
+	SessionResponse,
 } from "./dto";
 import { ApiResponseDto } from "@utils";
 
@@ -24,7 +25,7 @@ export class SessionController {
 	async createOne(@Body() dto: CreateSessionRequest) {
 		const session = await this.sessionService.createOne(dto);
 		return new ApiResponseDto(
-			{ sessionId: session.id },
+			SessionResponse.fromEntity(session),
 			null,
 			"Created successfully",
 		);
@@ -39,13 +40,13 @@ export class SessionController {
 	@Get()
 	async findMany(@Query() query: SessionQuery) {
 		const data = await this.sessionService.findMany(query);
-		return new ApiResponseDto(data);
+		return new ApiResponseDto(SessionResponse.fromEntities(data));
 	}
 
 	@Get(":id")
 	async findOne(@Param("id") id: string) {
 		const data = await this.sessionService.findOne(id);
-		return new ApiResponseDto(data);
+		return new ApiResponseDto(SessionResponse.fromEntity(data));
 	}
 
 	@Delete(":id")

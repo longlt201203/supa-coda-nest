@@ -1,18 +1,20 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
 import * as fs from "fs";
 import { ParseUserPromptResponse } from "../prompt-parser-agent/dto";
-import { genAI } from "@utils";
+import { genAI, SupaCodaClsStore } from "@utils";
 import {
 	AnalyzeStruturedUserRequirementResponse,
 	AnalyzeStruturedUserRequirementResponseJsonSchema,
 } from "./dto";
 import { BaAgentMemoryRepository } from "@db/repositories";
 import { ContentListUnion } from "@google/genai";
+import { ClsService } from "nestjs-cls";
 
 @Injectable()
 export class BaAgentService implements OnModuleInit {
 	constructor(
 		private readonly baAgentMemoryRepository: BaAgentMemoryRepository,
+		private readonly cls: ClsService<SupaCodaClsStore>,
 	) {}
 
 	private instructionFilePath = "instructions/ba-agent.txt";
@@ -32,14 +34,21 @@ export class BaAgentService implements OnModuleInit {
 		request: ParseUserPromptResponse,
 		response: AnalyzeStruturedUserRequirementResponse,
 	) {
+		const sessionId = this.cls.get("session.id");
 		await this.baAgentMemoryRepository.save({
 			input: JSON.stringify(request),
 			output: JSON.stringify(response),
+			sessionId: sessionId,
 		});
 	}
 
 	private async getMemories() {
-		const entities = await this.baAgentMemoryRepository.find();
+		const sessionId = this.cls.get("session.id");
+		const entities = await this.baAgentMemoryRepository.find({
+			where: {
+				sessionId: sessionId,
+			},
+		});
 		return entities.map((item) => ({
 			input: item.input,
 			output: item.output,
