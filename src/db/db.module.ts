@@ -6,6 +6,7 @@ import {
 	BaAgentMemoryRepository,
 	DevAgentMemoryRepository,
 	GreetingAgentMemoryRepository,
+	ProjectRepository,
 	PromptParserAgentMemoryRepository,
 	SessionRepository,
 } from "./repositories";
@@ -16,6 +17,7 @@ const repositorires = [
 	BaAgentMemoryRepository,
 	DevAgentMemoryRepository,
 	SessionRepository,
+	ProjectRepository,
 ];
 
 @Global()

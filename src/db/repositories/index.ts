@@ -4,3 +4,4 @@ export * from "./prompt-parser-agent-memory.repository";
 export * from "./ba-agent-memory.repository";
 export * from "./dev-agent-memory.repository";
 export * from "./session.repository";
+export * from "./project.repository";

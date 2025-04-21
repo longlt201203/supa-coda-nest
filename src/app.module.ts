@@ -6,6 +6,7 @@ import { AgentsModule } from "@modules/agents";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { SessionModule } from "@modules/session";
 import { ClsModule } from "nestjs-cls";
+import { ProjectModule } from "@modules/project";
 
 @Module({
 	imports: [
@@ -22,6 +23,7 @@ import { ClsModule } from "nestjs-cls";
 		}),
 		SessionModule,
 		AgentsModule,
+		ProjectModule,
 	],
 	controllers: [],
 	providers: [
